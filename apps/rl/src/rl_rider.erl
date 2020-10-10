@@ -7,7 +7,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0]).
+-export([start_link/0, join_ride/2, is_riding/1, ride_info/1]).
 
 %% gen_server
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
@@ -18,8 +18,6 @@
 -define(INIT_STATE, #{
   ride => undefined
 }).
-
--compile(export_all).
 
 %%%===================================================================
 %%% API

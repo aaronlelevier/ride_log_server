@@ -8,9 +8,7 @@
 -module(rl_client).
 -author("Aaron Lelevier").
 -vsn(1.0).
--export([]).
--compile(export_all).
--compile(debug_info).
+-export([start/0]).
 
 %% @doc A Rider starts a new Ride
 start() ->
