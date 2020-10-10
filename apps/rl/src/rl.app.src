@@ -1,15 +1,20 @@
 {application, rl,
- [{description, "An OTP application"},
-  {vsn, "0.1.0"},
-  {registered, []},
-  {mod, {rl_app, []}},
-  {applications,
-   [kernel,
-    stdlib
-   ]},
-  {env,[]},
-  {modules, []},
+  [{description, "An OTP application"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {mod, {rl_app, []}},
+    {applications,
+      [
+        kernel,
+        stdlib,
+        %% 3rd party
+        lager,
+        rebar3_format,
+        uuid
+      ]},
+    {env, []},
+    {modules, []},
 
-  {licenses, ["Apache 2.0"]},
-  {links, []}
- ]}.
+    {licenses, ["Apache 2.0"]},
+    {links, []}
+  ]}.
