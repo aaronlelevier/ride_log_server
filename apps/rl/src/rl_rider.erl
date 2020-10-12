@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
 %%% @author Aaron Lelevier
-%%% @doc
+%%% @doc Rider server where a single Process maps to a single Rider
 %%% @end
 %%%-------------------------------------------------------------------
 -module(rl_rider).
@@ -28,6 +28,7 @@ start_link() ->
 
 %% @doc Rider begins a Ride
 %% this should POST the Rider's first "start point" entry for the Ride
+-spec join_ride(pid(), pid()) -> ok.
 join_ride(RiderId, RideId) ->
   lager:debug("join_ride RiderId:~p", [RiderId]),
   gen_server:call(RiderId, {join_ride, RideId}).
