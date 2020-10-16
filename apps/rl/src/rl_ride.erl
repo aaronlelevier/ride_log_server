@@ -22,14 +22,12 @@
 %%% API
 %%%===================================================================
 
--spec start_link(RideId :: id()) -> {ok, pid()}.
-start_link(RideId) ->
-  gen_server:start_link(?MODULE, [RideId], []).
-
+-spec create_ride(binary()) -> {ok, #ride{}}.
 create_ride(Name) ->
   {ok, RideId} = rl_db:create_ride(Name),
   {ok, _Pid} = start_link(RideId),
-  {ok, RideId}.
+  Ride = #ride{id = RideId, name = Name},
+  {ok, Ride}.
 
 add_rider(RideId, RiderId) ->
   gen_server:call(RideId, {add_rider, RiderId}).
@@ -41,9 +39,14 @@ list_riders(RideId) ->
 %%% Spawning and gen_server implementation
 %%%===================================================================
 
+-spec start_link(id()) -> {ok, pid()}.
+start_link(RideId) ->
+  gen_server:start_link(?MODULE, [RideId], []).
+
+-spec init(id()) -> {ok, map()}.
 init(RideId) ->
   {ok, #{
-    ride_id => RideId,
+    id => RideId,
     riders => []
   }}.
 

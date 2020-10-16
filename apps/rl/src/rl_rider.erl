@@ -5,9 +5,15 @@
 %%%-------------------------------------------------------------------
 -module(rl_rider).
 -behaviour(gen_server).
+-include_lib("ride_log.hrl").
 
 %% API
--export([start_link/0, join_ride/2, is_riding/1, ride_info/1]).
+-export([
+  create_rider/1,
+  start_link/1,
+  join_ride/2,
+  is_riding/1,
+  ride_info/1]).
 
 %% gen_server
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
@@ -23,8 +29,12 @@
 %%% API
 %%%===================================================================
 
-start_link() ->
-  gen_server:start_link(?MODULE, [], []).
+-spec create_rider(binary()) -> {ok, #rider{}}.
+create_rider(Name) ->
+  {ok, RiderId} = rl_db:create_rider(Name),
+  {ok, _Pid} = start_link(RiderId),
+  Rider = #rider{id = RiderId, name = Name},
+  {ok, Rider}.
 
 %% @doc Rider begins a Ride
 %% this should POST the Rider's first "start point" entry for the Ride
@@ -43,8 +53,16 @@ ride_info(RiderId) ->
 %%% Spawning and gen_server implementation
 %%%===================================================================
 
-init([]) ->
-  {ok, ?INIT_STATE}.
+-spec start_link(id()) -> {ok, pid()}.
+start_link(RiderId) ->
+  gen_server:start_link(?MODULE, [RiderId], []).
+
+-spec init(id()) -> {ok, map()}.
+init(RiderId) ->
+  {ok, #{
+    id => RiderId,
+    ride => undefined
+  }}.
 
 handle_call({join_ride, RideId}, _From, State0) ->
   lager:debug("handle_call join_ride RiderId:~p", [self()]),

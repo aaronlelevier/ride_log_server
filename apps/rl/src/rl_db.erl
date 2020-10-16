@@ -16,6 +16,7 @@
   start_db/0,
   write/1,
   create_ride/1,
+  create_rider/1,
   lookup/2,
   match/1
 ]).
@@ -78,6 +79,13 @@ create_ride(Name) ->
   ok = mnesia:dirty_write({ride, RideId, Name}),
   {ok, RideId}.
 
+-spec create_rider(binary()) -> {ok, RiderId} when
+  RiderId :: id().
+create_rider(Name) ->
+  RiderId = rl_util:id(),
+  %% TODO: might need to wrap in a transaction
+  ok = mnesia:dirty_write({rider, RiderId, Name}),
+  {ok, RiderId}.
 
 %%------------------------------------------------------------------------------
 %% Read Queries
@@ -114,7 +122,8 @@ wait_for_tables() ->
 tables() ->
   [
     {rl_db_ride_to_rider, ride_to_rider},
-    {rl_db_ride, ride}
+    {rl_db_ride, ride},
+    {rl_db_rider, rider}
   ].
 
 table_names() ->

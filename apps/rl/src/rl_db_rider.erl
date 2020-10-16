@@ -1,11 +1,11 @@
 %%%-------------------------------------------------------------------
 %%% @author Aaron Lelevier
-%%% @doc 'ride' table spec
+%%% @doc 'rider' table spec
 %%%
 %%% @end
 %%% Created : 12. Oct 2020 9:30 AM
 %%%-------------------------------------------------------------------
--module(rl_db_ride).
+-module(rl_db_rider).
 -behaviour(rl_db_table).
 -author("Aaron Lelevier").
 -vsn(1.0).
@@ -13,10 +13,10 @@
 
 -export([name/0, opts/0]).
 
-name() -> ride.
+name() -> rider.
 
 opts() -> [
-  {attributes, record_info(fields, ride)},
+  {attributes, record_info(fields, rider)},
   {disc_copies, [node()]},
   {type, bag},
   {storage_properties, [{ets, []}]}
