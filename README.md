@@ -6,6 +6,8 @@ Hobby project for learning Erlang where the subject domain is logging bike ride 
 
 This project is under development.
 
+This is a [rebar3](https://www.rebar3.org/) project. rebar3 commands are used to: build, start, test.
+
 # For Now
 
 A Rider goes on a Ride.

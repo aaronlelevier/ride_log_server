@@ -18,8 +18,13 @@
   create_ride/1,
   create_rider/1,
   lookup/2,
-  match/1
+  match/1,
+  select/1
 ]).
+
+%% Required for transactions
+-include_lib("stdlib/include/qlc.hrl").
+
 -include("ride_log.hrl").
 
 -define(TIMEOUT, 2000).
@@ -28,6 +33,7 @@
 %%% API
 %%%===================================================================
 
+%% TODO: will need to add a "name" param for dependency injection and test suite
 -spec start() -> ok.
 start() ->
   ok = create_db(),
@@ -90,7 +96,7 @@ create_rider(Name) ->
 %%------------------------------------------------------------------------------
 %% Read Queries
 %%------------------------------------------------------------------------------
--spec lookup(atom(), any()) -> {ok, [tuple()]}.
+-spec lookup(atom(), id()) -> {ok, [tuple()]}.
 lookup(Table, Key) ->
   {ok, mnesia:dirty_read(Table, Key)}.
 
@@ -98,6 +104,11 @@ lookup(Table, Key) ->
 match(Pattern) when is_tuple(Pattern) ->
   {ok, mnesia:dirty_match_object(Pattern)}.
 
+%%------------------------------------------------------------------------------
+%% Transactional Operations
+%%------------------------------------------------------------------------------
+select(Table) ->
+  do(qlc:q([X || X <- mnesia:table(Table)])).
 
 %%%===================================================================
 %%% Internal functions
@@ -121,10 +132,18 @@ wait_for_tables() ->
 
 tables() ->
   [
-    {rl_db_ride_to_rider, ride_to_rider},
+    {rl_db_ride_points, ride_points},
     {rl_db_ride, ride},
     {rl_db_rider, rider}
   ].
 
 table_names() ->
   [Name || {_Mod, Name} <- tables()].
+
+%%------------------------------------------------------------------------------
+%% Transactional Operations
+%%------------------------------------------------------------------------------
+do(Q) ->
+  F = fun() -> qlc:e(Q) end,
+  {atomic, Val} = mnesia:transaction(F),
+  Val.
