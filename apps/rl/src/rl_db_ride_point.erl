@@ -1,11 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Aaron Lelevier
-%%% @doc 'ride' table spec
-%%%
+%%% @doc 'ride_point' represents a Point on a Ride for a Rider
 %%% @end
 %%% Created : 12. Oct 2020 9:30 AM
 %%%-------------------------------------------------------------------
--module(rl_db_ride).
+-module(rl_db_ride_point).
 -author("Aaron Lelevier").
 -vsn(1.0).
 -include("ride_log.hrl").
@@ -23,16 +22,26 @@
 %%------------------------------------------------------------------------------
 %% Types
 %%------------------------------------------------------------------------------
--record(ride, {
+-record(ride_point, {
   id :: id(),
-  name :: binary()
+  ride_id :: id(),
+  rider_id :: id(),
+  point_dt :: erlang:timestamp(),
+  point_name :: atom(),
+  point_lat :: float(),
+  point_lng :: float()
 }).
 
--type ride() :: #ride{}.
+-type ride_point() :: #ride_point{}.
 
 -type item() :: #{
 id => id(),
-name => binary()
+ride_id => id(),
+rider_id => id(),
+point_dt => erlang:timestamp(),
+point_name => atom(),
+point_lat => float(),
+point_lng => float()
 }.
 
 -export_type([
@@ -45,11 +54,12 @@ name => binary()
 -behaviour(rl_db_table).
 -export([name/0, opts/0]).
 
-name() -> ride.
+name() -> ride_point.
 
 opts() -> [
-  {attributes, record_info(fields, ride)},
+  {attributes, record_info(fields, ride_point)},
   {disc_copies, [node()]},
+  {index, [rider_id]},
   {type, bag},
   {storage_properties, [{ets, []}]}
 ].
@@ -68,23 +78,44 @@ lookup(Id) ->
   {ok, Items} = rl_db:lookup(name(), Id),
   {ok, [to_item(Item) || Item <- Items]}.
 
--spec from_item(map()) -> ride().
+-spec from_item(map()) -> ride_point().
 from_item(#{
   id := Id,
-  name := Name
+  ride_id := RideId,
+  rider_id := RiderId,
+  point_dt := PointDt,
+  point_name := PointName,
+  point_lat := PointLat,
+  point_lng := PointLng
 }) ->
-  #ride{
+  #ride_point{
     id = Id,
-    name = Name
+    ride_id = RideId,
+    rider_id = RiderId,
+    point_dt = PointDt,
+    point_name = PointName,
+    point_lat = PointLat,
+    point_lng = PointLng
   }.
 
--spec to_item(ride()) -> map().
-to_item(#ride{
+-spec to_item(ride_point()) -> map().
+to_item(#ride_point{
   id = Id,
-  name = Name
+  ride_id = RideId,
+  rider_id = RiderId,
+  point_dt = PointDt,
+  point_name = PointName,
+  point_lat = PointLat,
+  point_lng = PointLng
 }) -> #{
   id => Id,
-  name => Name}.
+  ride_id => RideId,
+  rider_id => RiderId,
+  point_dt => PointDt,
+  point_name => PointName,
+  point_lat => PointLat,
+  point_lng => PointLng
+}.
 
 %%%===================================================================
 %%% Internal functions

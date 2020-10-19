@@ -29,11 +29,11 @@
 %%% API
 %%%===================================================================
 
--spec create_rider(binary()) -> {ok, #rider{}}.
+-spec create_rider(binary()) -> {ok, rl_db_rider:item()}.
 create_rider(Name) ->
   {ok, RiderId} = rl_db:create_rider(Name),
   {ok, _Pid} = start_link(RiderId),
-  Rider = #rider{id = RiderId, name = Name},
+  Rider = #{id => RiderId, name => Name},
   {ok, Rider}.
 
 %% @doc Rider begins a Ride

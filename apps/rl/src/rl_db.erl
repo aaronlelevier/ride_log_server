@@ -132,7 +132,7 @@ wait_for_tables() ->
 
 tables() ->
   [
-    {rl_db_ride_points, ride_points},
+    {rl_db_ride_point, ride_point},
     {rl_db_ride, ride},
     {rl_db_rider, rider}
   ].
