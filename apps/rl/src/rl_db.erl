@@ -107,6 +107,9 @@ match(Pattern) when is_tuple(Pattern) ->
 %%------------------------------------------------------------------------------
 %% Transactional Operations
 %%------------------------------------------------------------------------------
+
+%% TODO: currently returns a list of records of the table type, need to check the 'tables()' mapping and convert to 'map()'
+-spec select(atom()) -> [map()].
 select(Table) ->
   do(qlc:q([X || X <- mnesia:table(Table)])).
 

@@ -19,7 +19,8 @@
 -export([
   ride_insert_and_lookup/1,
   rider_insert_and_lookup/1,
-  ride_point_insert_and_lookup/1
+  ride_point_insert_and_lookup/1,
+  ride_point_lookup_all_ride_points/1
 ]).
 
 %%%===================================================================
@@ -29,7 +30,8 @@ all() ->
   [
     ride_insert_and_lookup,
     rider_insert_and_lookup,
-    ride_point_insert_and_lookup
+    ride_point_insert_and_lookup,
+    ride_point_lookup_all_ride_points
   ].
 
 %%==============================================================================
@@ -81,14 +83,15 @@ rider_insert_and_lookup(_Config) ->
   [Rider | _] = Riders,
   Rider = ExpectedRider.
 
-
 ride_point_insert_and_lookup(_Config) ->
   % ride info
   Id = rl_util:id(),
+  RideId = rl_util:id(),
+  RiderId = rl_util:id(),
   ExpectedRidePoint = #{
     id => Id,
-    ride_id => rl_util:id(),
-    rider_id => rl_util:id(),
+    ride_id => RideId,
+    rider_id => RiderId,
     point_dt => erlang:timestamp(),
     point_name => start,
     point_lat => 38.5743927,
@@ -103,3 +106,38 @@ ride_point_insert_and_lookup(_Config) ->
   1 = length(RidePoints),
   [RidePoint | _] = RidePoints,
   RidePoint = ExpectedRidePoint.
+
+ride_point_lookup_all_ride_points(_Config) ->
+  % Ride 1
+  RideId1 = rl_util:id(),
+  RidePoint1 = #{
+    id => rl_util:id(),
+    ride_id => RideId1,
+    rider_id => rl_util:id(),
+    point_dt => erlang:timestamp(),
+    point_name => start,
+    point_lat => 1,
+    point_lng => 2
+  },
+  % Ride 2 - is a different ride
+  RideId2 = rl_util:id(),
+  RidePoint2 = #{
+    id => rl_util:id(),
+    ride_id => RideId2,
+    rider_id => rl_util:id(),
+    point_dt => erlang:timestamp(),
+    point_name => start,
+    point_lat => 1,
+    point_lng => 2
+  },
+  % insert Ride Points
+  ok = rl_db_ride_point:insert(RidePoint1),
+  ok = rl_db_ride_point:insert(RidePoint2),
+
+  RidePoints = rl_db_ride_point:lookup_all_ride_points(RideId2),
+
+  % should only get 1 Ride Point back
+  true = length(RidePoints) =:= 1,
+  % confirm RidePoint matches for Ride 2
+  [Rp|_] = RidePoints,
+  RideId2 = maps:get(ride_id, Rp).

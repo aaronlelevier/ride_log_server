@@ -36,6 +36,8 @@ create_rider(Name) ->
   Rider = #{id => RiderId, name => Name},
   {ok, Rider}.
 
+%% TODO: should not be able to join the same ride more than once
+%% TODO: should not be able to join more than one ride at a time
 %% @doc Rider begins a Ride
 %% this should POST the Rider's first "start point" entry for the Ride
 -spec join_ride(pid(), pid()) -> ok.

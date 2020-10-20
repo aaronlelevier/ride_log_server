@@ -8,6 +8,7 @@
 -author("Aaron Lelevier").
 -vsn(1.0).
 -include("ride_log.hrl").
+-include_lib("stdlib/include/ms_transform.hrl").
 
 %%------------------------------------------------------------------------------
 %% API
@@ -16,7 +17,9 @@
   insert/1,
   lookup/1,
   from_item/1,
-  to_item/1
+  to_item/1,
+  lookup_all_ride_points/1,
+  lookup_riders/1
 ]).
 
 %%------------------------------------------------------------------------------
@@ -77,6 +80,34 @@ insert(Map) when is_map(Map) ->
 lookup(Id) ->
   {ok, Items} = rl_db:lookup(name(), Id),
   {ok, [to_item(Item) || Item <- Items]}.
+
+%% @doc Returns all Ride Points for a single Ride
+-spec lookup_all_ride_points(id()) -> {ok, [item()]}.
+lookup_all_ride_points(RideId) ->
+  Match = ets:fun2ms(
+    fun(Rp = #ride_point{ride_id = RideId2})
+      when RideId =:=  RideId2 ->
+      Rp
+    end
+  ),
+  Records = mnesia:dirty_select(ride_point, Match),
+  [to_item(R) || R <-  Records].
+
+%% TODO: WIP - returning RiderId's now. Need to JOIN other Rider fields
+%% @doc Return all Riders for a single Ride
+-spec lookup_riders(id()) -> [rl_db_rider:item()].
+lookup_riders(RideId) ->
+  Match = ets:fun2ms(
+    fun(#ride_point{ride_id = RideId2, rider_id = RiderId})
+      when RideId =:=  RideId2 ->
+      RiderId
+    end
+  ),
+  mnesia:dirty_select(ride_point, Match).
+
+%%------------------------------------------------------------------------------
+%% Item
+%%------------------------------------------------------------------------------
 
 -spec from_item(map()) -> ride_point().
 from_item(#{
