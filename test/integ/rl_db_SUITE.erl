@@ -58,7 +58,7 @@ end_per_suite(_Config) ->
 ride_insert_and_lookup(_Config) ->
   % ride info
   Id = rl_util:id(),
-  ExpectedRide = #{id => Id, name => <<"test ride">>},
+  ExpectedRide = ride(Id),
 
   % insert Ride
   ok = rl_db_ride:insert(ExpectedRide),
@@ -72,7 +72,7 @@ ride_insert_and_lookup(_Config) ->
 rider_insert_and_lookup(_Config) ->
   % ride info
   Id = rl_util:id(),
-  ExpectedRider = #{id => Id, name => <<"Aaron">>},
+  ExpectedRider = rider(Id),
 
   % insert Rider
   ok = rl_db_rider:insert(ExpectedRider),
@@ -86,12 +86,10 @@ rider_insert_and_lookup(_Config) ->
 ride_point_insert_and_lookup(_Config) ->
   % ride info
   Id = rl_util:id(),
-  RideId = rl_util:id(),
-  RiderId = rl_util:id(),
   ExpectedRidePoint = #{
     id => Id,
-    ride_id => RideId,
-    rider_id => RiderId,
+    ride => ride(),
+    rider => rider(),
     point_dt => erlang:timestamp(),
     point_name => start,
     point_lat => 38.5743927,
@@ -109,11 +107,10 @@ ride_point_insert_and_lookup(_Config) ->
 
 ride_point_lookup_all_ride_points(_Config) ->
   % Ride 1
-  RideId1 = rl_util:id(),
   RidePoint1 = #{
     id => rl_util:id(),
-    ride_id => RideId1,
-    rider_id => rl_util:id(),
+    ride => ride(),
+    rider => rider(),
     point_dt => erlang:timestamp(),
     point_name => start,
     point_lat => 1,
@@ -121,10 +118,12 @@ ride_point_lookup_all_ride_points(_Config) ->
   },
   % Ride 2 - is a different ride
   RideId2 = rl_util:id(),
+  Ride2 = ride(RideId2),
+  Rider2 = rider(),
   RidePoint2 = #{
     id => rl_util:id(),
-    ride_id => RideId2,
-    rider_id => rl_util:id(),
+    ride => Ride2,
+    rider => Rider2,
     point_dt => erlang:timestamp(),
     point_name => start,
     point_lat => 1,
@@ -140,4 +139,17 @@ ride_point_lookup_all_ride_points(_Config) ->
   true = length(RidePoints) =:= 1,
   % confirm RidePoint matches for Ride 2
   [Rp|_] = RidePoints,
-  RideId2 = maps:get(ride_id, Rp).
+  Ride2 = maps:get(ride, Rp),
+
+  % lookup riders on a ride
+  Riders = rl_db_ride_point:lookup_riders(RideId2),
+  Riders = [Rider2].
+
+%%%===================================================================
+%%% Internal functions
+%%%===================================================================
+ride() -> ride(rl_util:id()).
+ride(Id) -> #{id => Id, name => <<"test ride">>}.
+
+rider() -> rider(rl_util:id()).
+rider(Id) -> #{id => Id, name => <<"Aaron">>}.

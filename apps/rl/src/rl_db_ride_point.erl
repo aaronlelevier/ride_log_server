@@ -25,22 +25,10 @@
 %%------------------------------------------------------------------------------
 %% Types
 %%------------------------------------------------------------------------------
--record(ride_point, {
-  id :: id(),
-  ride_id :: id(),
-  rider_id :: id(),
-  point_dt :: erlang:timestamp(),
-  point_name :: atom(),
-  point_lat :: float(),
-  point_lng :: float()
-}).
-
--type ride_point() :: #ride_point{}.
-
 -type item() :: #{
 id => id(),
-ride_id => id(),
-rider_id => id(),
+ride => ride(),
+rider => rider(),
 point_dt => erlang:timestamp(),
 point_name => atom(),
 point_lat => float(),
@@ -62,7 +50,6 @@ name() -> ride_point.
 opts() -> [
   {attributes, record_info(fields, ride_point)},
   {disc_copies, [node()]},
-  {index, [rider_id]},
   {type, bag},
   {storage_properties, [{ets, []}]}
 ].
@@ -85,35 +72,35 @@ lookup(Id) ->
 -spec lookup_all_ride_points(id()) -> {ok, [item()]}.
 lookup_all_ride_points(RideId) ->
   Match = ets:fun2ms(
-    fun(Rp = #ride_point{ride_id = RideId2})
-      when RideId =:=  RideId2 ->
+    fun(Rp = #ride_point{ride = Ride})
+      when RideId =:= Ride#ride.id ->
       Rp
     end
   ),
   Records = mnesia:dirty_select(ride_point, Match),
   [to_item(R) || R <-  Records].
 
-%% TODO: WIP - returning RiderId's now. Need to JOIN other Rider fields
 %% @doc Return all Riders for a single Ride
 -spec lookup_riders(id()) -> [rl_db_rider:item()].
 lookup_riders(RideId) ->
   Match = ets:fun2ms(
-    fun(#ride_point{ride_id = RideId2, rider_id = RiderId})
-      when RideId =:=  RideId2 ->
-      RiderId
+    fun(#ride_point{ride = Ride, rider = Rider})
+      when RideId =:= Ride#ride.id ->
+      Rider
     end
   ),
-  mnesia:dirty_select(ride_point, Match).
+  [rl_db_rider:to_item(X) || X <- mnesia:dirty_select(ride_point, Match)].
+
 
 %%------------------------------------------------------------------------------
 %% Item
 %%------------------------------------------------------------------------------
 
--spec from_item(map()) -> ride_point().
+-spec from_item(item()) -> ride_point().
 from_item(#{
   id := Id,
-  ride_id := RideId,
-  rider_id := RiderId,
+  ride := Ride,
+  rider := Rider,
   point_dt := PointDt,
   point_name := PointName,
   point_lat := PointLat,
@@ -121,27 +108,27 @@ from_item(#{
 }) ->
   #ride_point{
     id = Id,
-    ride_id = RideId,
-    rider_id = RiderId,
+    ride = rl_db_ride:from_item(Ride),
+    rider = rl_db_rider:from_item(Rider),
     point_dt = PointDt,
     point_name = PointName,
     point_lat = PointLat,
     point_lng = PointLng
   }.
 
--spec to_item(ride_point()) -> map().
+-spec to_item(ride_point()) -> item().
 to_item(#ride_point{
   id = Id,
-  ride_id = RideId,
-  rider_id = RiderId,
+  ride = Ride,
+  rider = Rider,
   point_dt = PointDt,
   point_name = PointName,
   point_lat = PointLat,
   point_lng = PointLng
 }) -> #{
   id => Id,
-  ride_id => RideId,
-  rider_id => RiderId,
+  ride => rl_db_ride:to_item(Ride),
+  rider => rl_db_rider:to_item(Rider),
   point_dt => PointDt,
   point_name => PointName,
   point_lat => PointLat,
