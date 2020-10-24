@@ -19,7 +19,8 @@
   from_item/1,
   to_item/1,
   lookup_all_ride_points/1,
-  lookup_riders/1
+  lookup_riders/1,
+  lookup_one_riders_points/2
 ]).
 
 %%------------------------------------------------------------------------------
@@ -77,8 +78,7 @@ lookup_all_ride_points(RideId) ->
       Rp
     end
   ),
-  Records = mnesia:dirty_select(ride_point, Match),
-  [to_item(R) || R <-  Records].
+  [to_item(R) || R <- mnesia:dirty_select(ride_point, Match)].
 
 %% @doc Return all Riders for a single Ride
 -spec lookup_riders(id()) -> [rl_db_rider:item()].
@@ -91,6 +91,16 @@ lookup_riders(RideId) ->
   ),
   [rl_db_rider:to_item(X) || X <- mnesia:dirty_select(ride_point, Match)].
 
+%% @doc Return all Ride Points for a single Rider on a Ride
+-spec lookup_one_riders_points(id(), id()) -> [rl_db_ride_point:item()].
+lookup_one_riders_points(RideId, RiderId) ->
+  Match = ets:fun2ms(
+    fun(Rp = #ride_point{ride = Ride, rider = Rider})
+      when RideId =:= Ride#ride.id andalso RiderId =:= Rider#rider.id ->
+      Rp
+    end
+  ),
+  [to_item(R) || R <- mnesia:dirty_select(ride_point, Match)].
 
 %%------------------------------------------------------------------------------
 %% Item

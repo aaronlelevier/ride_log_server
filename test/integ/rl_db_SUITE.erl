@@ -107,10 +107,12 @@ ride_point_insert_and_lookup(_Config) ->
 
 ride_point_lookup_all_ride_points(_Config) ->
   % Ride 1
+  RiderId1 = rl_util:id(),
+  Rider1 = rider(RiderId1),
   RidePoint1 = #{
     id => rl_util:id(),
     ride => ride(),
-    rider => rider(),
+    rider => Rider1,
     point_dt => erlang:timestamp(),
     point_name => start,
     point_lat => 1,
@@ -144,6 +146,56 @@ ride_point_lookup_all_ride_points(_Config) ->
   % lookup riders on a ride
   Riders = rl_db_ride_point:lookup_riders(RideId2),
   Riders = [Rider2].
+
+lookup_one_riders_points(_Config) ->
+  % Ride 1 - Point 1
+  RideId1 = rl_util:id(),
+  Ride1 = ride(RideId1),
+  RiderId1 = rl_util:id(),
+  Rider1 = rider(RiderId1),
+  RidePoint1 = #{
+    id => rl_util:id(),
+    ride => Ride1,
+    rider => Rider1,
+    point_dt => erlang:timestamp(),
+    point_name => start,
+    point_lat => 1,
+    point_lng => 2
+  },
+  % Rider 1 - Point 2
+  RidePoint1b = #{
+    id => rl_util:id(),
+    ride => Ride1,
+    rider => Rider1,
+    point_dt => erlang:timestamp(),
+    point_lat => 2,
+    point_lng => 2
+  },
+  % Ride 2 - Point 1
+  RideId2 = rl_util:id(),
+  Ride2 = ride(RideId2),
+  Rider2 = rider(),
+  RidePoint2 = #{
+    id => rl_util:id(),
+    ride => Ride2,
+    rider => Rider2,
+    point_dt => erlang:timestamp(),
+    point_name => start,
+    point_lat => 1,
+    point_lng => 2
+  },
+  % insert Ride Points
+  ok = rl_db_ride_point:insert(RidePoint1),
+  ok = rl_db_ride_point:insert(RidePoint1b),
+  ok = rl_db_ride_point:insert(RidePoint2),
+
+  % lookup one rider's points
+  RidePoints = rl_db_ride_point:lookup_one_riders_points(RiderId1, RiderId1),
+
+  2 = length(RidePoints),
+  true = lists:member(RidePoint1, RidePoints),
+  true = lists:member(RidePoint1b, RidePoints).
+
 
 %%%===================================================================
 %%% Internal functions
