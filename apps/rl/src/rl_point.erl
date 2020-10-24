@@ -6,7 +6,9 @@
 %%% Created : 12. Oct 2020 8:43 AM
 %%%-------------------------------------------------------------------
 -module(rl_point).
--author("Aaron Lelevier").
--vsn(1.0).
--export([]).
 
+-author("Aaron Lelevier").
+
+-vsn(1.0).
+
+-export([]).
