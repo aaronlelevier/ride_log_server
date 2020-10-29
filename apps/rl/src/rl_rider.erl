@@ -7,7 +7,7 @@
 
 -behaviour(gen_server).
 
--include_lib("ride_log.hrl").
+-include("ride_log.hrl").
 
 %% API
 -export([create_rider/1, start_link/1, join_ride/2, is_riding/1, ride_info/1]).
