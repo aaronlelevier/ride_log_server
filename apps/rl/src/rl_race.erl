@@ -13,7 +13,7 @@
 -include("ride_log.hrl").
 
 %% API
--export([start_link/2, get_state/1, cancel/1, register_rider/2]).
+-export([start_link/2, get_state/1, cancel/1, register_rider/2, stop/1]).
 %% State callbacks
 -export([registration/3]).
 %% gen_statem callbacks
@@ -49,6 +49,8 @@ min_rider_count => seconds(),
 -spec start_link(atom(), state()) -> {ok, pid()}.
 start_link(Name, Args) ->
     gen_statem:start_link({local, Name}, ?MODULE, Args, []).
+
+stop(Name) -> gen_statem:stop(Name).
 
 -spec get_state(atom()) -> {state_name(), state()}.
 get_state(Name) ->
