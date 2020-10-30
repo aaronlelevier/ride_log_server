@@ -26,18 +26,18 @@
 
 -type state_name() :: registration | cancelled | prepare_for_start | start | finished.
 -type seconds() :: integer().
-
 %% @doc Should be a list of a minimum of 2 Points where the first and last Point
 %% in the list are the Start and End Points
 -type points() :: [point()].
 -type state() :: #{rider_count => integer(),
-riders => [rider()],
-min_rider_count => seconds(),
+                   riders => [rider()],
+                   min_rider_count => seconds(),
                    max_rider_count => seconds(),
                    registration_time => seconds(),
                    prepare_for_start_time => seconds(),
                    race_time => seconds(),
-                   points => points()}.
+                   points => points(),
+                   cancellation_ref => timer:tref() | undefined}.
 
 %%%===================================================================
 %%% API
@@ -50,7 +50,8 @@ min_rider_count => seconds(),
 start_link(Name, Args) ->
     gen_statem:start_link({local, Name}, ?MODULE, Args, []).
 
-stop(Name) -> gen_statem:stop(Name).
+stop(Name) ->
+    gen_statem:stop(Name).
 
 -spec get_state(atom()) -> {state_name(), state()}.
 get_state(Name) ->
@@ -60,7 +61,7 @@ cancel(Name) ->
     gen_statem:call(Name, cancel).
 
 register_rider(Name, Rider) ->
-  gen_statem:call(Name, {register_rider, Rider}).
+    gen_statem:call(Name, {register_rider, Rider}).
 
 %%%===================================================================
 %%% state callbacks
@@ -72,19 +73,24 @@ register_rider(Name, Rider) ->
 %% functions is called when gen_statem receives and event from
 %% call/2, cast/2, or as a normal process message.
 registration({call, From}, {register_rider, Rider}, State) ->
-  NewState = State#{
-    rider_count:= maps:get(rider_count, State) + 1,
-    riders := [Rider | maps:get(riders, State)]
-  },
-  {keep_state, NewState, [{reply, From, {registration, State}}]};
-
+    NewState =
+        State#{rider_count := maps:get(rider_count, State) + 1,
+               riders := [Rider | maps:get(riders, State)]},
+    {keep_state, NewState, [{reply, From, {registration, State}}]};
 registration(EventType, EventContent, State) ->
     handle_event(EventType, EventContent, State).
 
 handle_event({call, From}, get_state, State) ->
     {keep_state, State, [{reply, From, {registration, State}}]};
+
+%% TODO: either need to check the `From` here or need another way to differentiate between a 'force cancel' and a 'cancel per min_riders not present'
 handle_event({call, From}, cancel, State) ->
-    {next_state, cancelled, State, [{reply, From, {cancelled, State}}]}.
+    lager:debug("~p", [{{call, From}, cancel, State}]),
+    {next_state, cancelled, State, [{reply, From, {cancelled, State}}]};
+
+handle_event(EventType, EventContent, State) ->
+    lager:debug("Unhandled event: ~p", [{EventType, EventContent, State}]),
+    {keep_state, State}.
 
 %%%===================================================================
 %%% gen_statem callbacks
@@ -97,7 +103,8 @@ handle_event({call, From}, cancel, State) ->
 -spec init(state()) -> {ok, registration, state()}.
 init(State) ->
     lager:debug("~p", [State]),
-    {ok, registration, State}.
+    {ok, State2} = set_cancellation_policy(State),
+    {ok, registration, State2}.
 
 %% @private
 %% @doc This function is called by a gen_statem when it needs to find out
@@ -136,3 +143,11 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+-spec set_cancellation_policy(state()) -> {ok, state()}.
+set_cancellation_policy(State) ->
+    {registered_name, Name} = process_info(self(), registered_name),
+    %% TODO: no sure if `send_after` should be used instead?
+    {ok, TRef} =
+        timer:apply_after(maps:get(registration_time, State), ?MODULE, cancel, [Name]),
+    {ok, State#{cancellation_ref => TRef}}.

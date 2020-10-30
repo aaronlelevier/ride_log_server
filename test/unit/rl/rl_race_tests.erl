@@ -29,6 +29,30 @@ a_race_can_be_started_and_cancelled_test() ->
   ?assertEqual(cancelled, StateName2),
   ?assertEqual(Args, State2).
 
+race_cancelled_if_N_riders_not_registered_in_T_time_test() ->
+  RegistrationTime = 1,
+  Race = race1,
+  Args = #{
+    rider_count => 0,
+    riders => [],
+    min_rider_count => 1,
+    max_rider_count => 2,
+    registration_time => RegistrationTime,
+    prepare_for_start_time => 2,
+    race_time => 10,
+    points => 3
+  },
+  {ok, _Pid} = rl_race:start_link(Race, Args),
+
+  % initial state
+  {StateName1, _State1} = rl_race:get_state(Race),
+  ?assertEqual(registration, StateName1),
+
+  timer:sleep(RegistrationTime * 1000),
+
+  {StateName2, _State2} = rl_race:get_state(Race),
+  ?assertEqual(cancelled, StateName2).
+
 
 %%%===================================================================
 %%% setup / cleanup for multi FSM tests
