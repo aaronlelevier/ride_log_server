@@ -66,7 +66,8 @@ register_rider_test_() ->
     [
       fun start_with_0_riders/0,
       fun register_1_rider/0,
-      fun min_rider_count_satisfied_so_race_not_cancelled/0
+      fun min_rider_count_satisfied_so_race_not_cancelled/0,
+      fun max_rider_count_reached_so_transition_to_registration_full/0
     ]
   }.
 
@@ -101,6 +102,19 @@ min_rider_count_satisfied_so_race_not_cancelled() ->
   {StateName, State} = rl_race:get_state(?RACE),
   ?assertEqual(registration, StateName).
 
+max_rider_count_reached_so_transition_to_registration_full() ->
+  {StateName, State} = rl_race:get_state(?RACE),
+  ?assertEqual(registration, StateName),
+  ?assertEqual(1, maps:get(rider_count, State)),
+  ?assertEqual(2, maps:get(max_rider_count, State)),
+
+  Rider = #{id => rl_util:id(), name => <<"Jerry">>},
+  {StateName1, _State1} = rl_race:register_rider(?RACE, Rider),
+
+  {StateName1, State1} = rl_race:get_state(?RACE),
+  ?assertEqual(registration_full, StateName1),
+  ?assertEqual(2, maps:get(rider_count, State1)),
+  ?assertEqual(2, maps:get(max_rider_count, State1)).
 
 %%%===================================================================
 %%% Internal functions

@@ -15,16 +15,20 @@
 %% API
 -export([start_link/2, get_state/1, cancel/1, register_rider/2, stop/1]).
 %% State callbacks
--export([registration/3, cancelled/3]).
+-export([registration/3, registration_full/3, cancelled/3]).
 %% gen_statem callbacks
--export([init/1, format_status/2, terminate/3, code_change/4,
-         callback_mode/0]).
+-export([init/1, format_status/2, terminate/3, code_change/4, callback_mode/0]).
 
 %%------------------------------------------------------------------------------
 %% Types
 %%------------------------------------------------------------------------------
 
--type state_name() :: registration | cancelled | prepare_for_start | start | finished.
+-type state_name() :: registration |
+                      registration_full |
+                      cancelled |
+                      prepare_for_start |
+                      start |
+                      finished.
 -type seconds() :: integer().
 %% @doc Should be a list of a minimum of 2 Points where the first and last Point
 %% in the list are the Start and End Points
@@ -67,19 +71,28 @@ register_rider(Name, Rider) ->
 %%% state callbacks
 %%%===================================================================
 
-%% @private
-%% @doc There should be one instance of this function for each possible
-%% state name.  If callback_mode is state_functions, one of these
-%% functions is called when gen_statem receives and event from
-%% call/2, cast/2, or as a normal process message.
+%% @doc registration: registers riders for the race. There are 2 scenarios:
+%% A - can register
+%% B - registration full
 registration({call, From}, {register_rider, Rider}, State) ->
+    RiderCount = maps:get(rider_count, State),
+    MaxRiderCount = maps:get(max_rider_count, State),
+    NewRiderCount = RiderCount + 1,
     NewState =
-        State#{rider_count := maps:get(rider_count, State) + 1,
-               riders := [Rider | maps:get(riders, State)]},
-    {keep_state, NewState, [{reply, From, {registration, State}}]};
+        State#{rider_count := NewRiderCount, riders := [Rider | maps:get(riders, State)]},
+    if NewRiderCount =:= MaxRiderCount ->
+           {next_state, registration_full, NewState, [{reply, From, {registration_full, State}}]};
+       true ->
+           {keep_state, NewState, [{reply, From, {registration, State}}]}
+    end;
 registration({call, From}, get_state, State) ->
     {keep_state, State, [{reply, From, {registration, State}}]};
 registration(EventType, EventContent, State) ->
+    handle_event(EventType, EventContent, State).
+
+registration_full({call, From}, get_state, State) ->
+    {keep_state, State, [{reply, From, {registration_full, State}}]};
+registration_full(EventType, EventContent, State) ->
     handle_event(EventType, EventContent, State).
 
 cancelled({call, From}, get_state, State) ->
@@ -90,19 +103,16 @@ cancelled(EventType, EventContent, State) ->
 handle_event({call, From}, cancel, State) ->
     lager:debug("~p", [{{call, From}, cancel, State}]),
     {next_state, cancelled, State, [{reply, From, {cancelled, State}}]};
-
-handle_event({call, _From}, {cancellation_check, Ref}, #{cancellation_check_ref := Ref}=State) ->
+handle_event({call, _From},
+             {cancellation_check, Ref},
+             #{cancellation_check_ref := Ref} = State) ->
     lager:debug("~p", [{{call, _From}, {cancellation_check, Ref}, State}]),
     case maps:get(rider_count, State) < maps:get(min_rider_count, State) of
         true ->
             {next_state, cancelled, State};
         false ->
             {keep_state, State}
-    end;
-
-handle_event(EventType, EventContent, State) ->
-    lager:debug("Unhandled event: ~p", [{EventType, EventContent, State}]),
-    {keep_state, State}.
+    end.
 
 %%%===================================================================
 %%% gen_statem callbacks
@@ -136,8 +146,11 @@ format_status(_Opt, [_PDict, _StateName, _State]) ->
 
 %% @private
 %% @doc This function is called by a gen_statem when it is about to terminate
+terminate(normal, StateName, State) ->
+    lager:debug("terminate: ~p", [{normal, StateName, State}]),
+    ok;
 terminate(Reason, StateName, State) ->
-    lager:debug("~p", [{Reason, StateName, State}]),
+    lager:error("terminate: ~p", [{Reason, StateName, State}]),
     ok.
 
 %% @private
@@ -154,9 +167,8 @@ set_cancellation_check(State) ->
     {registered_name, Name} = process_info(self(), registered_name),
     Ref = make_ref(),
     {ok, _TRef} =
-        timer:apply_after(
-            maps:get(registration_time, State) * 1000,
-            gen_statem,
-            call,
-            [Name, {cancellation_check, Ref}]),
+        timer:apply_after(maps:get(registration_time, State) * 1000,
+                          gen_statem,
+                          call,
+                          [Name, {cancellation_check, Ref}]),
     {ok, State#{cancellation_check_ref => Ref}}.
