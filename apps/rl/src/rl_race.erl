@@ -50,22 +50,25 @@
 %% @doc Creates a gen_statem process which calls Module:init/1 to
 %% initialize. To ensure a synchronized start-up procedure, this
 %% function does not return until Module:init/1 has returned.
--spec start_link(atom(), state()) -> {ok, pid()}.
-start_link(Name, Args) ->
-    gen_statem:start_link({local, Name}, ?MODULE, Args, []).
+-spec start_link(race(), state()) -> {ok, pid()}.
+start_link(Race, Args) ->
+    gen_statem:start_link({local, Race}, ?MODULE, Args, []).
 
-stop(Name) ->
-    gen_statem:stop(Name).
+-spec stop(race()) -> ok.
+stop(Race) ->
+    gen_statem:stop(Race).
 
--spec get_state(atom()) -> {state_name(), state()}.
-get_state(Name) ->
-    gen_statem:call(Name, get_state).
+-spec get_state(race()) -> {state_name(), state()}.
+get_state(Race) ->
+    gen_statem:call(Race, get_state).
 
-cancel(Name) ->
-    gen_statem:call(Name, cancel).
+-spec cancel(race()) -> {state_name(), state()}.
+cancel(Race) ->
+    gen_statem:call(Race, cancel).
 
-register_rider(Name, Rider) ->
-    gen_statem:call(Name, {register_rider, Rider}).
+-spec register_rider(race(), rl_db_rider:item()) -> {state_name(), state()}.
+register_rider(Race, Rider) ->
+    gen_statem:call(Race, {register_rider, Rider}).
 
 %%%===================================================================
 %%% state callbacks
