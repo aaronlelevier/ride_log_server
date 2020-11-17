@@ -85,3 +85,34 @@
 }).
 
 -type ride_point() :: #ride_point{}.
+
+%%------------------------------------------------------------------------------
+%% Seconds
+%%------------------------------------------------------------------------------
+-type seconds() :: integer().
+
+%%------------------------------------------------------------------------------
+%% Points
+%% @doc Should be a list of a minimum of 2 Points where the first and last Point
+%% in the list are the Start and End Points
+%%------------------------------------------------------------------------------
+-type points() :: [point()].
+
+%%------------------------------------------------------------------------------
+%% Race
+%%------------------------------------------------------------------------------
+-record(race_state, {
+  id :: race(),
+  state_name :: atom(),
+rider_count :: integer(),
+riders :: [rider()],
+min_rider_count :: seconds(),
+max_rider_count :: seconds(),
+registration_time :: seconds(),
+prepare_for_start_time :: seconds(),
+race_time :: seconds(),
+points :: points(),
+cancellation_check_ref :: reference()
+}).
+
+-type race_state() :: #race_state{}.

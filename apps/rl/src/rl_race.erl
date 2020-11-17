@@ -29,13 +29,8 @@
                       prepare_for_start |
                       start |
                       finished.
--type seconds() :: integer().
-%% @doc Should be a list of a minimum of 2 Points where the first and last Point
-%% in the list are the Start and End Points
--type points() :: [point()].
--type state() :: #{
-state_name => atom(),
-rider_count => integer(),
+-type state() :: #{state_name => atom() | undefined,
+                   rider_count => integer(),
                    riders => [rider()],
                    min_rider_count => seconds(),
                    max_rider_count => seconds(),
