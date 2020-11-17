@@ -65,6 +65,7 @@ register_rider_test_() ->
     fun register_rider_cleanup/1,
     [
       fun start_with_0_riders/0,
+      fun start_shows_state_name_in_state/0,
       fun register_1_rider/0,
       fun min_rider_count_satisfied_so_race_not_cancelled/0,
       fun max_rider_count_reached_so_transition_to_registration_full/0
@@ -76,6 +77,11 @@ start_with_0_riders() ->
   ?assertEqual(registration, StateName1),
   ?assertEqual(0, maps:get(rider_count, State1)),
   ?assertEqual([], maps:get(riders, State1)).
+
+start_shows_state_name_in_state() ->
+  {StateName, State} = rl_race:get_state(?RACE),
+  ?assertEqual(registration, StateName),
+  ?assertEqual(registration, maps:get(state_name, State)).
 
 register_1_rider() ->
   Rider = #{id => rl_util:id(), name => <<"Bob">>},

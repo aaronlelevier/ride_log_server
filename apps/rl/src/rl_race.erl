@@ -33,7 +33,9 @@
 %% @doc Should be a list of a minimum of 2 Points where the first and last Point
 %% in the list are the Start and End Points
 -type points() :: [point()].
--type state() :: #{rider_count => integer(),
+-type state() :: #{
+state_name => atom(),
+rider_count => integer(),
                    riders => [rider()],
                    min_rider_count => seconds(),
                    max_rider_count => seconds(),
@@ -50,8 +52,12 @@
 %% @doc Creates a gen_statem process which calls Module:init/1 to
 %% initialize. To ensure a synchronized start-up procedure, this
 %% function does not return until Module:init/1 has returned.
+%%
+%% Default 'state_name' to registration is for new FSM case, otherwise we
+%% would restore to a previous 'state_name' when re-initializing the FSM
 -spec start_link(race(), state()) -> {ok, pid()}.
-start_link(Race, Args) ->
+start_link(Race, Args0) ->
+    Args = Args0#{state_name => maps:get(state_name, Args0, registration)},
     gen_statem:start_link({local, Race}, ?MODULE, Args, []).
 
 -spec stop(race()) -> ok.
