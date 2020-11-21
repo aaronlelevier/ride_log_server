@@ -67,8 +67,8 @@ register_rider_test_() ->
       fun start_with_0_riders/0,
       fun start_shows_state_name_in_state/0,
       fun register_1_rider/0,
-      fun min_rider_count_satisfied_so_race_not_cancelled/0,
-      fun max_rider_count_reached_so_transition_to_registration_full/0
+      fun max_rider_count_reached_so_transition_to_registration_full/0,
+      fun min_rider_count_satisfied_so_race_not_cancelled/0
     ]
   }.
 
@@ -94,20 +94,6 @@ register_1_rider() ->
   ?assertEqual(1, maps:get(rider_count, State2)),
   ?assertEqual([Rider], maps:get(riders, State2)).
 
-min_rider_count_satisfied_so_race_not_cancelled() ->
-  {StateName, State} = rl_race:get_state(?RACE),
-  ?assertEqual(registration, StateName),
-  ?assertEqual(
-    true,
-    maps:get(rider_count, State) >= maps:get(min_rider_count, State)
-  ),
-
-  %% TODO: might be a better way than sleeping for the registration time to confirm check
-  timer:sleep(maps:get(registration_time, State) * 1000),
-
-  {StateName, State} = rl_race:get_state(?RACE),
-  ?assertEqual(registration, StateName).
-
 max_rider_count_reached_so_transition_to_registration_full() ->
   {StateName, State} = rl_race:get_state(?RACE),
   ?assertEqual(registration, StateName),
@@ -121,6 +107,20 @@ max_rider_count_reached_so_transition_to_registration_full() ->
   ?assertEqual(registration_full, StateName1),
   ?assertEqual(2, maps:get(rider_count, State1)),
   ?assertEqual(2, maps:get(max_rider_count, State1)).
+
+min_rider_count_satisfied_so_race_not_cancelled() ->
+  {StateName, State} = rl_race:get_state(?RACE),
+  ?assertEqual(registration_full, StateName),
+  ?assertEqual(
+    true,
+    maps:get(rider_count, State) >= maps:get(min_rider_count, State)
+  ),
+
+  %% TODO: might be a better way than sleeping for the registration time to confirm check
+  timer:sleep(maps:get(registration_time, State) * 1000),
+
+  {StateName2, State} = rl_race:get_state(?RACE),
+  ?assertEqual(prepare_for_start, StateName2).
 
 %%%===================================================================
 %%% Internal functions

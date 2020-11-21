@@ -15,7 +15,7 @@
 %% API
 -export([start_link/2, get_state/1, cancel/1, register_rider/2, stop/1]).
 %% State callbacks
--export([registration/3, registration_full/3, cancelled/3]).
+-export([registration/3, registration_full/3, cancelled/3, prepare_for_start/3]).
 %% gen_statem callbacks
 -export([init/1, format_status/2, terminate/3, code_change/4, callback_mode/0]).
 
@@ -90,6 +90,11 @@ cancelled({call, From}, get_state, State) ->
 cancelled(EventType, EventContent, State) ->
     handle_event(EventType, EventContent, State).
 
+prepare_for_start({call, From}, get_state, State) ->
+    {keep_state, State, [{reply, From, {prepare_for_start, State}}]};
+prepare_for_start(EventType, EventContent, State) ->
+    handle_event(EventType, EventContent, State).
+
 handle_event({call, From}, cancel, State) ->
     lager:debug("~p", [{{call, From}, cancel, State}]),
     {next_state, cancelled, State, [{reply, From, {cancelled, State}}]};
@@ -101,7 +106,7 @@ handle_event({call, _From},
         true ->
             {next_state, cancelled, State};
         false ->
-            {keep_state, State}
+            {next_state, prepare_for_start, State}
     end.
 
 %%%===================================================================
