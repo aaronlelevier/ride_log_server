@@ -135,8 +135,6 @@ ride_point_lookup_all_ride_points(_Config) ->
     Riders = rl_db_ride_point:lookup_riders(RideId2),
     Riders = [Rider2].
 
-
-
 %% TODO: bring back test
 lookup_one_riders_points(_Config) ->
     % Ride 1 - Point 1

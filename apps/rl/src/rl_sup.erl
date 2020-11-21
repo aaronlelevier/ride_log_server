@@ -13,7 +13,6 @@
 
 %% API
 -export([start_link/0, start_race/2, stop_race/1]).
-
 %% Callbacks
 -export([init/1]).
 
@@ -34,14 +33,13 @@ init([]) ->
 -spec start_race(race(), rl_race:state()) -> {ok, pid()}.
 start_race(Race, Args) ->
     ChildId = rl_util:id(),
-    ChildSpec = #{
-        id => ChildId,
-        start => {rl_race, start_link, [Race, Args]},
-        restart => permanent,
-        shutdown => 10, % Timeout
-        type => worker,
-        modules => [rl_race, gen_statem]
-    },
+    ChildSpec =
+        #{id => ChildId,
+          start => {rl_race, start_link, [Race, Args]},
+          restart => permanent,
+          shutdown => 10, % Timeout
+          type => worker,
+          modules => [rl_race, gen_statem]},
     supervisor:start_child(?SERVER, ChildSpec).
 
 %% @doc stops a race and removes it from the list of 'children'
@@ -60,11 +58,12 @@ stop_race(Race) ->
 %%% Internal functions
 %%%===================================================================
 
--spec get_child(Race) -> {ok, ChildId} | {error, Race} when
-    ChildId :: race(),
-    Race :: atom().
+-spec get_child(Race) -> {ok, ChildId} | {error, Race} when ChildId :: race(),
+                                                            Race :: atom().
 get_child(Race) ->
     case lists:keyfind(whereis(Race), 2, supervisor:which_children(?MODULE)) of
-        false -> {error, Race};
-        Tuple -> {ok, element(1, Tuple)}
+        false ->
+            {error, Race};
+        Tuple ->
+            {ok, element(1, Tuple)}
     end.

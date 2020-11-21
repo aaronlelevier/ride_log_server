@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# format erlang files
+rebar3 format --files apps/**/*.erl
+rebar3 format --files apps/**/*.hrl
+rebar3 format --files test/**/*.erl
