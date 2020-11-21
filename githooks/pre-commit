@@ -4,3 +4,6 @@
 rebar3 format --files apps/**/*.erl
 rebar3 format --files apps/**/*.hrl
 rebar3 format --files test/**/*.erl
+
+# add back any changed fils to the commit
+git add .

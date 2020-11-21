@@ -29,7 +29,8 @@
                       prepare_for_start |
                       start |
                       finished.
--type state() :: #{state_name => atom() | undefined,
+-type state() :: #{id => race(),
+                   state_name => atom() | undefined,
                    rider_count => integer(),
                    riders => [rider()],
                    min_rider_count => seconds(),
@@ -52,7 +53,7 @@
 %% would restore to a previous 'state_name' when re-initializing the FSM
 -spec start_link(race(), state()) -> {ok, pid()}.
 start_link(Race, Args0) ->
-    Args = Args0#{state_name => maps:get(state_name, Args0, registration)},
+    Args = Args0#{id => Race, state_name => maps:get(state_name, Args0, registration)},
     gen_statem:start_link({local, Race}, ?MODULE, Args, []).
 
 -spec stop(race()) -> ok.

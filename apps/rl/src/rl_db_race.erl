@@ -55,7 +55,7 @@ lookup(Id) ->
     {ok, [to_item(Item) || Item <- Items]}.
 
 -spec from_item(map()) -> race_state().
-from_item(#{id := Id,
+from_item(#{id := Race,
             state_name := StateName,
             rider_count := RiderCount,
             riders := Riders,
@@ -66,7 +66,7 @@ from_item(#{id := Id,
             race_time := RaceTime,
             points := Points,
             cancellation_check_ref := CancellationCheckRef}) ->
-    #race_state{id = Id,
+    #race_state{id = Race,
                 state_name = StateName,
                 rider_count = RiderCount,
                 riders = Riders,
@@ -79,7 +79,7 @@ from_item(#{id := Id,
                 cancellation_check_ref = CancellationCheckRef}.
 
 -spec to_item(race_state()) -> map().
-to_item(#race_state{id = Id,
+to_item(#race_state{id = Race,
                     state_name = StateName,
                     rider_count = RiderCount,
                     riders = Riders,
@@ -90,7 +90,7 @@ to_item(#race_state{id = Id,
                     race_time = RaceTime,
                     points = Points,
                     cancellation_check_ref = CancellationCheckRef}) ->
-    #{id => Id,
+    #{id => Race,
       state_name => StateName,
       rider_count => RiderCount,
       riders => Riders,
