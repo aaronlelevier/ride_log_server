@@ -18,12 +18,15 @@ a_race_can_be_started_and_cancelled_test() ->
   {ok, _Pid} = rl_race:start_link(Race, Args),
 
   % initial state
-  {StateName1, _State1} = rl_race:get_state(Race),
+  {StateName1, State1} = rl_race:get_state(Race),
   ?assertEqual(registration, StateName1),
+  ?assertEqual(registration, maps:get(state_name, State1)),
 
   % cancel race
-  {StateName2, _State2} = rl_race:cancel(Race),
-  ?assertEqual(cancelled, StateName2).
+  ?assertEqual(ok, rl_race:cancel(Race)),
+  {StateName2, State2} = rl_race:get_state(Race),
+  ?assertEqual(cancelled, StateName2),
+  ?assertEqual(cancelled, maps:get(state_name, State2)).
 
 race_cancelled_if_N_riders_not_registered_in_T_time_test() ->
   RegistrationTime = 0,
@@ -43,7 +46,8 @@ race_cancelled_if_N_riders_not_registered_in_T_time_test() ->
   % initial state
   {StateName1, State} = rl_race:get_state(Race),
   true = maps:get(rider_count, State) < maps:get(min_rider_count, State),
-  ?assertEqual(cancelled, StateName1).
+  ?assertEqual(cancelled, StateName1),
+  ?assertEqual(cancelled, maps:get(state_name, State)).
 
 
 %%%===================================================================
@@ -65,7 +69,6 @@ register_rider_test_() ->
     fun register_rider_cleanup/1,
     [
       fun start_with_0_riders/0,
-      fun start_shows_state_name_in_state/0,
       fun register_1_rider/0,
       fun max_rider_count_reached_so_transition_to_registration_full/0,
       fun min_rider_count_satisfied_so_race_not_cancelled/0
@@ -77,11 +80,6 @@ start_with_0_riders() ->
   ?assertEqual(registration, StateName1),
   ?assertEqual(0, maps:get(rider_count, State1)),
   ?assertEqual([], maps:get(riders, State1)).
-
-start_shows_state_name_in_state() ->
-  {StateName, State} = rl_race:get_state(?RACE),
-  ?assertEqual(registration, StateName),
-  ?assertEqual(registration, maps:get(state_name, State)).
 
 register_1_rider() ->
   Rider = #{id => rl_util:id(), name => <<"Bob">>},
@@ -105,6 +103,7 @@ max_rider_count_reached_so_transition_to_registration_full() ->
 
   {StateName1, State1} = rl_race:get_state(?RACE),
   ?assertEqual(registration_full, StateName1),
+  ?assertEqual(registration_full, maps:get(state_name, State1)),
   ?assertEqual(2, maps:get(rider_count, State1)),
   ?assertEqual(2, maps:get(max_rider_count, State1)).
 
@@ -119,8 +118,9 @@ min_rider_count_satisfied_so_race_not_cancelled() ->
   %% TODO: might be a better way than sleeping for the registration time to confirm check
   timer:sleep(maps:get(registration_time, State) * 1000),
 
-  {StateName2, State} = rl_race:get_state(?RACE),
-  ?assertEqual(prepare_for_start, StateName2).
+  {StateName2, State2} = rl_race:get_state(?RACE),
+  ?assertEqual(prepare_for_start, StateName2),
+  ?assertEqual(prepare_for_start, maps:get(state_name, State2)).
 
 %%%===================================================================
 %%% Internal functions

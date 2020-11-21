@@ -71,42 +71,40 @@ registration({call, From}, {register_rider, Rider}, State) ->
     NewState =
         State#{rider_count := NewRiderCount, riders := [Rider | maps:get(riders, State)]},
     if NewRiderCount =:= MaxRiderCount ->
-           {next_state, registration_full, NewState, [{reply, From, {registration_full, State}}]};
+           next_state({next_state,
+                       registration_full,
+                       NewState,
+                       [{reply, From, {registration_full, State}}]});
        true ->
            {keep_state, NewState, [{reply, From, {registration, NewState}}]}
     end;
-registration({call, From}, get_state, State) ->
-    {keep_state, State, [{reply, From, {registration, State}}]};
 registration(EventType, EventContent, State) ->
     handle_event(EventType, EventContent, State).
 
-registration_full({call, From}, get_state, State) ->
-    {keep_state, State, [{reply, From, {registration_full, State}}]};
 registration_full(EventType, EventContent, State) ->
     handle_event(EventType, EventContent, State).
 
-cancelled({call, From}, get_state, State) ->
-    {keep_state, State, [{reply, From, {cancelled, State}}]};
 cancelled(EventType, EventContent, State) ->
     handle_event(EventType, EventContent, State).
 
-prepare_for_start({call, From}, get_state, State) ->
-    {keep_state, State, [{reply, From, {prepare_for_start, State}}]};
 prepare_for_start(EventType, EventContent, State) ->
     handle_event(EventType, EventContent, State).
 
+handle_event({call, From}, get_state, State) ->
+    StateName = maps:get(state_name, State),
+    {keep_state, State, [{reply, From, {StateName, State}}]};
 handle_event({call, From}, cancel, State) ->
     lager:debug("~p", [{{call, From}, cancel, State}]),
-    {next_state, cancelled, State, [{reply, From, {cancelled, State}}]};
+    next_state({next_state, cancelled, State, [{reply, From, ok}]});
 handle_event({call, _From},
              {cancellation_check, Ref},
              #{cancellation_check_ref := Ref} = State) ->
     lager:debug("~p", [{{call, _From}, {cancellation_check, Ref}, State}]),
     case maps:get(rider_count, State) < maps:get(min_rider_count, State) of
         true ->
-            {next_state, cancelled, State};
+            next_state({next_state, cancelled, State});
         false ->
-            {next_state, prepare_for_start, State}
+            next_state({next_state, prepare_for_start, State})
     end.
 
 %%%===================================================================
@@ -167,3 +165,12 @@ set_cancellation_check(State) ->
                           call,
                           [Name, {cancellation_check, Ref}]),
     {ok, State#{cancellation_check_ref => Ref}}.
+
+%% @doc helper for keeping the 'state_name' updated in the 'state'
+-spec next_state(tuple()) -> tuple().
+next_state({next_state, StateName, State0}) ->
+    State = State0#{state_name := StateName},
+    {next_state, StateName, State};
+next_state({next_state, StateName, State0, Reply}) ->
+    State = State0#{state_name := StateName},
+    {next_state, StateName, State, Reply}.
