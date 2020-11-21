@@ -35,7 +35,10 @@
 %% would restore to a previous 'state_name' when re-initializing the FSM
 -spec start_link(race(), race_state()) -> {ok, pid()}.
 start_link(Race, Args0) ->
-    Args = Args0#{id => Race, state_name => maps:get(state_name, Args0, registration)},
+    Args =
+        Args0#{id => rl_util:id(),
+               name => Race,
+               state_name => maps:get(state_name, Args0, registration)},
     gen_statem:start_link({local, Race}, ?MODULE, Args, []).
 
 -spec stop(race()) -> ok.

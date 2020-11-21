@@ -105,6 +105,7 @@
 %%------------------------------------------------------------------------------
 -record(race_state,
         {id :: race(),
+         name :: binary(),
          state_name :: race_state_name(),
          cancellation_check_ref :: reference(),
          rider_count :: integer(),
@@ -117,6 +118,7 @@
          points :: points()}).
 
 -type race_state() :: #{id => race(),
+                        name => binary(),
                         state_name => race_state_name(),
                         cancellation_check_ref => reference() | undefined,
                         rider_count => integer(),

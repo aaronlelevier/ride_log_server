@@ -55,7 +55,8 @@ lookup(Id) ->
     {ok, [to_item(Item) || Item <- Items]}.
 
 -spec from_item(item()) -> #race_state{}.
-from_item(#{id := Race,
+from_item(#{id := Id,
+            name := Race,
             state_name := StateName,
             rider_count := RiderCount,
             riders := Riders,
@@ -66,7 +67,8 @@ from_item(#{id := Race,
             race_time := RaceTime,
             points := Points,
             cancellation_check_ref := CancellationCheckRef}) ->
-    #race_state{id = Race,
+    #race_state{id = Id,
+                name = Race,
                 state_name = StateName,
                 rider_count = RiderCount,
                 riders = [rl_db_rider:from_item(X) || X <- Riders],
@@ -79,7 +81,8 @@ from_item(#{id := Race,
                 cancellation_check_ref = CancellationCheckRef}.
 
 -spec to_item(#race_state{}) -> item().
-to_item(#race_state{id = Race,
+to_item(#race_state{id = Id,
+                    name = Race,
                     state_name = StateName,
                     rider_count = RiderCount,
                     riders = Riders,
@@ -90,7 +93,8 @@ to_item(#race_state{id = Race,
                     race_time = RaceTime,
                     points = Points,
                     cancellation_check_ref = CancellationCheckRef}) ->
-    #{id => Race,
+    #{id => Id,
+      name => Race,
       state_name => StateName,
       rider_count => RiderCount,
       riders => [rl_db_rider:to_item(X) || X <- Riders],
