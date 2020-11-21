@@ -10,6 +10,42 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-define(RIDE, #{id => rl_util:id(), name => <<"test ride">>}).
+
+-define(RIDER, #{id => rl_util:id(), name => <<"Aaron">>}).
+
+-define(POINT_NAME, start).
+
+-define(POINT_LAT, 31.5743927).
+
+-define(POINT_LNG, 100.1234392).
+
+
+create_ride_point_with_point_name_test() ->
+    NewRidePoint = #{
+        ride => ?RIDE,
+        rider => ?RIDER,
+        point_name => ?POINT_NAME,
+        point_lat => ?POINT_LAT,
+        point_lng => ?POINT_LNG
+    },
+
+    Ret = rl_db_ride_point:create(NewRidePoint),
+
+    ?assert(is_map(Ret)).
+
+create_ride_point_without_point_name_test() ->
+    NewRidePoint = #{
+        ride => ?RIDE,
+        rider => ?RIDER,
+        point_lat => ?POINT_LAT,
+        point_lng => ?POINT_LNG
+    },
+
+    Ret = rl_db_ride_point:create(NewRidePoint),
+
+    ?assert(is_map(Ret)).
+
 from_item_test() ->
     RideId = rl_util:id(),
     RiderId = rl_util:id(),

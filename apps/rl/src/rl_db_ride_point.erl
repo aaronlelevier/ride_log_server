@@ -17,7 +17,7 @@
 %%------------------------------------------------------------------------------
 %% API
 %%------------------------------------------------------------------------------
--export([insert/1, lookup/1, from_item/1, to_item/1, lookup_all_ride_points/1,
+-export([create/1, insert/1, lookup/1, from_item/1, to_item/1, lookup_all_ride_points/1,
          lookup_riders/1, lookup_one_riders_points/2]).
 
 %%------------------------------------------------------------------------------
@@ -26,6 +26,14 @@
 -type item() :: ride_point().
 
 -export_type([item/0]).
+
+%% @doc This is the RidePoint data sent by the client and does not contain
+%% calculated fields
+-type new_ride_point() :: #{ride => ride(),
+                            rider => rider(),
+                            point_name => atom() | undefined,
+                            point_lat => float(),
+                            point_lng => float()}.
 
 %%------------------------------------------------------------------------------
 %% Behavior rl_db_table
@@ -46,6 +54,19 @@ opts() ->
 %%%===================================================================
 %%% API
 %%%===================================================================
+
+-spec create(new_ride_point()) -> item().
+create(Map) when is_map(Map) ->
+    #{% calculated
+      id => rl_util:id(),
+      point_dt => calendar:local_time(),
+      % required
+      ride => maps:get(ride, Map),
+      rider => maps:get(rider, Map),
+      point_lat => maps:get(point_lat, Map),
+      point_lng => maps:get(point_lng, Map),
+      % optional
+      point_name => maps:get(point_name, Map, undefined)}.
 
 -spec insert(item()) -> ok | {error, any()}.
 insert(Map) when is_map(Map) ->

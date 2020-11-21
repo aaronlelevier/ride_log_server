@@ -73,7 +73,7 @@
                         ride => ride(),
                         rider => rider(),
                         point_dt => erlang:timestamp(),
-                        point_name => atom(),
+                        point_name => atom() | undefined,
                         point_lat => float(),
                         point_lng => float()}.
 %%------------------------------------------------------------------------------
