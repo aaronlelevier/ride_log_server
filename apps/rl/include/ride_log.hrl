@@ -86,13 +86,27 @@
 %% in the list are the Start and End Points
 %%------------------------------------------------------------------------------
 -type points() :: [point()].
+%%------------------------------------------------------------------------------
+%% Race State Name
+%%------------------------------------------------------------------------------
+-type race_state_name() :: registration |
+                           registration_full |
+                           cancelled |
+                           prepare_for_start |
+                           start |
+                           finished.
 
 %%------------------------------------------------------------------------------
-%% Race
+%% Race State
+%% @doc The race state, of which 3 fields are computed:
+%% - id: the name of the race
+%% - state_name: the current state name of the race
+%% - cancellation_check_ref: Erlang ref() to the cancellation policy of the race
 %%------------------------------------------------------------------------------
 -record(race_state,
         {id :: race(),
-         state_name :: atom(),
+         state_name :: race_state_name(),
+         cancellation_check_ref :: reference(),
          rider_count :: integer(),
          riders :: [rider()],
          min_rider_count :: seconds(),
@@ -100,11 +114,11 @@
          registration_time :: seconds(),
          prepare_for_start_time :: seconds(),
          race_time :: seconds(),
-         points :: points(),
-         cancellation_check_ref :: reference()}).
+         points :: points()}).
 
 -type race_state() :: #{id => race(),
-                        state_name => atom() | undefined,
+                        state_name => race_state_name(),
+                        cancellation_check_ref => reference() | undefined,
                         rider_count => integer(),
                         riders => [rider()],
                         min_rider_count => seconds(),
@@ -112,5 +126,4 @@
                         registration_time => seconds(),
                         prepare_for_start_time => seconds(),
                         race_time => seconds(),
-                        points => points(),
-                        cancellation_check_ref => reference() | undefined}.
+                        points => points()}.

@@ -23,13 +23,6 @@
 %% Types
 %%------------------------------------------------------------------------------
 
--type state_name() :: registration |
-                      registration_full |
-                      cancelled |
-                      prepare_for_start |
-                      start |
-                      finished.
-
 %%%===================================================================
 %%% API
 %%%===================================================================
@@ -49,15 +42,15 @@ start_link(Race, Args0) ->
 stop(Race) ->
     gen_statem:stop(Race).
 
--spec get_state(race()) -> {state_name(), race_state()}.
+-spec get_state(race()) -> {race_state_name(), race_state()}.
 get_state(Race) ->
     gen_statem:call(Race, get_state).
 
--spec cancel(race()) -> {state_name(), race_state()}.
+-spec cancel(race()) -> {race_state_name(), race_state()}.
 cancel(Race) ->
     gen_statem:call(Race, cancel).
 
--spec register_rider(race(), rl_db_rider:item()) -> {state_name(), race_state()}.
+-spec register_rider(race(), rl_db_rider:item()) -> {race_state_name(), race_state()}.
 register_rider(Race, Rider) ->
     gen_statem:call(Race, {register_rider, Rider}).
 
