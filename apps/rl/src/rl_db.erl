@@ -124,7 +124,10 @@ wait_for_tables() ->
     ok.
 
 tables() ->
-    [{rl_db_ride_point, ride_point}, {rl_db_ride, ride}, {rl_db_rider, rider}].
+    [{rl_db_ride_point, ride_point},
+     {rl_db_ride, ride},
+     {rl_db_rider, rider},
+     {rl_db_race, race}].
 
 table_names() ->
     [Name || {_Mod, Name} <- tables()].

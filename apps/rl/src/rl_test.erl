@@ -11,14 +11,20 @@
 
 -vsn(1.0).
 
--export([args/0]).
+-export([args/0, args/1]).
 
+-spec args() -> map().
 args() ->
-    #{rider_count => 0,
+    args([]).
+
+-spec args(proplists:proplist()) -> map().
+args(Opts) ->
+    #{% can't override because the 'init' func would need to call 'registration' state functions
       riders => [],
-      min_rider_count => 1,
-      max_rider_count => 2,
-      registration_time => 1,
-      prepare_for_start_time => 2,
-      race_time => 10,
-      points => 3}.
+      rider_count => proplists:get_value(rider_count, Opts, 2),
+      min_rider_count => proplists:get_value(min_rider_count, Opts, 1),
+      max_rider_count => proplists:get_value(max_rider_count, Opts, 2),
+      registration_time => proplists:get_value(registration_time, Opts, 1),
+      prepare_for_start_time => proplists:get_value(prepare_for_start_time, Opts, 2),
+      race_time => proplists:get_value(race_time, Opts, 10),
+      points => proplists:get_value(points, Opts, 3)}.

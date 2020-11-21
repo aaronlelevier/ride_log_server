@@ -54,7 +54,7 @@ lookup(Id) ->
     {ok, Items} = rl_db:lookup(name(), Id),
     {ok, [to_item(Item) || Item <- Items]}.
 
--spec from_item(race_state()) -> #race_state{}.
+-spec from_item(item()) -> #race_state{}.
 from_item(#{id := Race,
             state_name := StateName,
             rider_count := RiderCount,
@@ -69,7 +69,7 @@ from_item(#{id := Race,
     #race_state{id = Race,
                 state_name = StateName,
                 rider_count = RiderCount,
-                riders = Riders,
+                riders = [rl_db_rider:from_item(X) || X <- Riders],
                 min_rider_count = MinRiderCount,
                 max_rider_count = MaxRiderCount,
                 registration_time = RegistrationTime,
@@ -78,7 +78,7 @@ from_item(#{id := Race,
                 points = Points,
                 cancellation_check_ref = CancellationCheckRef}.
 
--spec to_item(#race_state{}) -> race_state().
+-spec to_item(#race_state{}) -> item().
 to_item(#race_state{id = Race,
                     state_name = StateName,
                     rider_count = RiderCount,
@@ -93,7 +93,7 @@ to_item(#race_state{id = Race,
     #{id => Race,
       state_name => StateName,
       rider_count => RiderCount,
-      riders => Riders,
+      riders => [rl_db_rider:to_item(X) || X <- Riders],
       min_rider_count => MinRiderCount,
       max_rider_count => MaxRiderCount,
       registration_time => RegistrationTime,

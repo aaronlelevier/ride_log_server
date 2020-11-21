@@ -23,6 +23,8 @@
 %%% API
 %%%===================================================================
 
+%% TODO: might want to support 'Name' arg as a 'string' and cast to 'binary'
+%% TODO: might want to rename func to 'create' to be more polymorphic
 -spec create_rider(binary()) -> {ok, rl_db_rider:item()}.
 create_rider(Name) ->
     {ok, RiderId} = rl_db:create_rider(Name),

@@ -70,7 +70,7 @@ registration({call, From}, {register_rider, Rider}, State) ->
     if NewRiderCount =:= MaxRiderCount ->
            {next_state, registration_full, NewState, [{reply, From, {registration_full, State}}]};
        true ->
-           {keep_state, NewState, [{reply, From, {registration, State}}]}
+           {keep_state, NewState, [{reply, From, {registration, NewState}}]}
     end;
 registration({call, From}, get_state, State) ->
     {keep_state, State, [{reply, From, {registration, State}}]};
