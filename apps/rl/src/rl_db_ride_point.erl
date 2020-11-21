@@ -23,13 +23,7 @@
 %%------------------------------------------------------------------------------
 %% Types
 %%------------------------------------------------------------------------------
--type item() :: #{id => id(),
-                  ride => ride(),
-                  rider => rider(),
-                  point_dt => erlang:timestamp(),
-                  point_name => atom(),
-                  point_lat => float(),
-                  point_lng => float()}.
+-type item() :: ride_point().
 
 -export_type([item/0]).
 
@@ -95,7 +89,7 @@ lookup_one_riders_points(RideId, RiderId) ->
 %% Item
 %%------------------------------------------------------------------------------
 
--spec from_item(item()) -> ride_point().
+-spec from_item(item()) -> #ride_point{}.
 from_item(#{id := Id,
             ride := Ride,
             rider := Rider,
@@ -111,7 +105,7 @@ from_item(#{id := Id,
                 point_lat = PointLat,
                 point_lng = PointLng}.
 
--spec to_item(ride_point()) -> item().
+-spec to_item(#ride_point{}) -> item().
 to_item(#ride_point{id = Id,
                     ride = Ride,
                     rider = Rider,

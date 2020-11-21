@@ -29,17 +29,6 @@
                       prepare_for_start |
                       start |
                       finished.
--type state() :: #{id => race(),
-                   state_name => atom() | undefined,
-                   rider_count => integer(),
-                   riders => [rider()],
-                   min_rider_count => seconds(),
-                   max_rider_count => seconds(),
-                   registration_time => seconds(),
-                   prepare_for_start_time => seconds(),
-                   race_time => seconds(),
-                   points => points(),
-                   cancellation_check_ref => reference() | undefined}.
 
 %%%===================================================================
 %%% API
@@ -51,7 +40,7 @@
 %%
 %% Default 'state_name' to registration is for new FSM case, otherwise we
 %% would restore to a previous 'state_name' when re-initializing the FSM
--spec start_link(race(), state()) -> {ok, pid()}.
+-spec start_link(race(), race_state()) -> {ok, pid()}.
 start_link(Race, Args0) ->
     Args = Args0#{id => Race, state_name => maps:get(state_name, Args0, registration)},
     gen_statem:start_link({local, Race}, ?MODULE, Args, []).
@@ -60,15 +49,15 @@ start_link(Race, Args0) ->
 stop(Race) ->
     gen_statem:stop(Race).
 
--spec get_state(race()) -> {state_name(), state()}.
+-spec get_state(race()) -> {state_name(), race_state()}.
 get_state(Race) ->
     gen_statem:call(Race, get_state).
 
--spec cancel(race()) -> {state_name(), state()}.
+-spec cancel(race()) -> {state_name(), race_state()}.
 cancel(Race) ->
     gen_statem:call(Race, cancel).
 
--spec register_rider(race(), rl_db_rider:item()) -> {state_name(), state()}.
+-spec register_rider(race(), rl_db_rider:item()) -> {state_name(), race_state()}.
 register_rider(Race, Rider) ->
     gen_statem:call(Race, {register_rider, Rider}).
 
@@ -127,7 +116,7 @@ handle_event({call, _From},
 %% @doc Whenever a gen_statem is started using gen_statem:start/[3,4] or
 %% gen_statem:start_link/[3,4], this function is called by the new
 %% process to initialize.
--spec init(state()) -> {ok, registration, state()}.
+-spec init(race_state()) -> {ok, registration, race_state()}.
 init(State) ->
     lager:debug("~p", [State]),
     {ok, State2} = set_cancellation_check(State),
@@ -167,7 +156,7 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
--spec set_cancellation_check(state()) -> {ok, state()}.
+-spec set_cancellation_check(race_state()) -> {ok, race_state()}.
 set_cancellation_check(State) ->
     {registered_name, Name} = process_info(self(), registered_name),
     Ref = make_ref(),

@@ -20,7 +20,7 @@
 %%------------------------------------------------------------------------------
 %% Types
 %%------------------------------------------------------------------------------
--type item() :: #{id => race(), name => binary()}.
+-type item() :: race_state().
 
 -export_type([item/0]).
 
@@ -54,7 +54,7 @@ lookup(Id) ->
     {ok, Items} = rl_db:lookup(name(), Id),
     {ok, [to_item(Item) || Item <- Items]}.
 
--spec from_item(map()) -> race_state().
+-spec from_item(race_state()) -> #race_state{}.
 from_item(#{id := Race,
             state_name := StateName,
             rider_count := RiderCount,
@@ -78,7 +78,7 @@ from_item(#{id := Race,
                 points = Points,
                 cancellation_check_ref = CancellationCheckRef}.
 
--spec to_item(race_state()) -> map().
+-spec to_item(#race_state{}) -> race_state().
 to_item(#race_state{id = Race,
                     state_name = StateName,
                     rider_count = RiderCount,
