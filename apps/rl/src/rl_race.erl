@@ -151,7 +151,13 @@ terminate(normal, StateName, State) ->
     ok;
 terminate(Reason, StateName, State) ->
     lager:error("terminate non-normal: ~p", [{Reason, StateName, State}]),
-    rl_db:write(rl_db_race:from_item(State)),
+    PersistState = application:get_env(rl, persist_race_state, true),
+    ok =
+        if PersistState ->
+               rl_db:write(rl_db_race:from_item(State));
+           true ->
+               ok
+        end,
     ok.
 
 %% @private

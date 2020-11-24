@@ -10,6 +10,9 @@
 
 
 can_start_and_stop_race_test() ->
+    % don't want mnesia to persist race state
+    application:set_env(rl, persist_race_state, false),
+
     {ok, _SupPid} = rl_sup:start_link(),
     ?assert(is_pid(whereis(rl_sup))),
 
