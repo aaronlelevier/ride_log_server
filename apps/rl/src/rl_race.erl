@@ -13,7 +13,7 @@
 -include("ride_log.hrl").
 
 %% API
--export([start_link/2, get_state/1, cancel/1, register_rider/2, stop/1]).
+-export([start_link/2, start/2, get_state/1, cancel/1, register_rider/2, stop/1]).
 %% State callbacks
 -export([registration/3, registration_full/3, cancelled/3, prepare_for_start/3]).
 %% gen_statem callbacks
@@ -35,11 +35,17 @@
 %% would restore to a previous 'state_name' when re-initializing the FSM
 -spec start_link(race(), race_state()) -> {ok, pid()}.
 start_link(Race, Args0) ->
-    Args =
-        Args0#{id => rl_util:id(),
-               name => Race,
-               state_name => maps:get(state_name, Args0, registration)},
+    Args = args(Race, Args0),
     gen_statem:start_link({local, Race}, ?MODULE, Args, []).
+
+start(Race, Args0) ->
+    Args = args(Race, Args0),
+    gen_statem:start({local, Race}, ?MODULE, Args, []).
+
+args(Race, Args0) ->
+    Args0#{id => rl_util:id(),
+           name => Race,
+           state_name => maps:get(state_name, Args0, registration)}.
 
 -spec stop(race()) -> ok.
 stop(Race) ->
@@ -118,6 +124,7 @@ handle_event({call, _From},
 -spec init(race_state()) -> {ok, registration, race_state()}.
 init(State) ->
     lager:debug("~p", [State]),
+    process_flag(trap_exit, true),
     {ok, State2} = set_cancellation_check(State),
     {ok, registration, State2}.
 
@@ -140,10 +147,11 @@ format_status(_Opt, [_PDict, _StateName, _State]) ->
 %% @private
 %% @doc This function is called by a gen_statem when it is about to terminate
 terminate(normal, StateName, State) ->
-    lager:debug("terminate: ~p", [{normal, StateName, State}]),
+    lager:debug("terminate normal: ~p", [{normal, StateName, State}]),
     ok;
 terminate(Reason, StateName, State) ->
-    lager:error("terminate: ~p", [{Reason, StateName, State}]),
+    lager:error("terminate non-normal: ~p", [{Reason, StateName, State}]),
+    rl_db:write(rl_db_race:from_item(State)),
     ok.
 
 %% @private

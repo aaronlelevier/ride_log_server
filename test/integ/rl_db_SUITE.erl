@@ -14,7 +14,8 @@
 -export([all/0, init_per_suite/1, end_per_suite/1]).
 %% Tests
 -export([ride_insert_and_lookup/1, rider_insert_and_lookup/1,
-         ride_point_insert_and_lookup/1, ride_point_lookup_all_ride_points/1]).
+         ride_point_insert_and_lookup/1, ride_point_lookup_all_ride_points/1,
+         race_state_saved_on_crash/1]).
 
 %%%===================================================================
 %%% API
@@ -23,7 +24,8 @@ all() ->
     [ride_insert_and_lookup,
      rider_insert_and_lookup,
      ride_point_insert_and_lookup,
-     ride_point_lookup_all_ride_points].
+     ride_point_lookup_all_ride_points,
+     race_state_saved_on_crash].
 
 %%==============================================================================
 %% Types
@@ -134,6 +136,14 @@ ride_point_lookup_all_ride_points(_Config) ->
     % lookup riders on a ride
     Riders = rl_db_ride_point:lookup_riders(RideId2),
     Riders = [Rider2].
+
+race_state_saved_on_crash(_Config) ->
+    Race = race0,
+    {ok, _Pid} = rl_race:start(Race, rl_test:args()),
+    0 = length(rl_db:select(race_state)),
+
+    exit(whereis(Race), 'TEST'),
+    1 = length(rl_db:select(race_state)).
 
 %% TODO: bring back test
 lookup_one_riders_points(_Config) ->
