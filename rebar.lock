@@ -1,17 +1,23 @@
 {"1.1.0",
-[{<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
+[{<<"cowboy">>,{pkg,<<"cowboy">>,<<"2.8.0">>},0},
+ {<<"cowlib">>,{pkg,<<"cowlib">>,<<"2.9.1">>},1},
+ {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
  {<<"katana_code">>,{pkg,<<"katana_code">>,<<"0.2.1">>},1},
  {<<"lager">>,{pkg,<<"lager">>,<<"3.8.0">>},0},
  {<<"quickrand">>,{pkg,<<"quickrand">>,<<"1.8.0">>},1},
+ {<<"ranch">>,{pkg,<<"ranch">>,<<"1.7.1">>},1},
  {<<"rebar3_format">>,{pkg,<<"rebar3_format">>,<<"0.2.1">>},0},
  {<<"redbug">>,{pkg,<<"redbug">>,<<"1.2.2">>},1},
  {<<"uuid">>,{pkg,<<"uuid_erl">>,<<"1.8.0">>},0}]}.
 [
 {pkg_hash,[
+ {<<"cowboy">>, <<"F3DC62E35797ECD9AC1B50DB74611193C29815401E53BAC9A5C0577BD7BC667D">>},
+ {<<"cowlib">>, <<"61A6C7C50CF07FDD24B2F45B89500BB93B6686579B069A89F88CB211E1125C78">>},
  {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
  {<<"katana_code">>, <<"B2195859DF57D8BEBF619A9FD3327CD7D01563A98417156D0F4C5FAB435F2630">>},
  {<<"lager">>, <<"3402B9A7E473680CA179FC2F1D827CAB88DD37DD1E6113090C6F45EF05228A1C">>},
  {<<"quickrand">>, <<"E47CE597FF067385FF5836C8C7706AC7F8AA7B47DD90C6417E05B64696F872FA">>},
+ {<<"ranch">>, <<"6B1FAB51B49196860B733A49C07604465A47BDB78AA10C1C16A3D199F7F8C881">>},
  {<<"rebar3_format">>, <<"5B4745DC885E12E38C5061D58E87C8C3984B4524A5299846A2B6A57ABE748BD3">>},
  {<<"redbug">>, <<"366D8961770DDC7BB5D209FBADDDFA7271005487F938C087A0E385A57ABFEE33">>},
  {<<"uuid">>, <<"280014F8FF57FCE36EE6E91C3ECF21CBFCE78AAE9854C09597BB4C11E27B66D6">>}]}
