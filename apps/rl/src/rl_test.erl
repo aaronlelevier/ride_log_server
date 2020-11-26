@@ -21,7 +21,7 @@ args() ->
 args(Opts) ->
     #{% can't override because the 'init' func would need to call 'registration' state functions
       riders => [],
-      rider_count => proplists:get_value(rider_count, Opts, 2),
+      rider_count => proplists:get_value(rider_count, Opts, 0),
       min_rider_count => proplists:get_value(min_rider_count, Opts, 1),
       max_rider_count => proplists:get_value(max_rider_count, Opts, 2),
       registration_time => proplists:get_value(registration_time, Opts, 1),
